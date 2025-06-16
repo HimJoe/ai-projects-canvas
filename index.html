@@ -1,0 +1,898 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI Project Canvas - Blank Canvas</title>
+    <style>
+        /* Reset and base styles */
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        
+        body {
+            background-color: #f5f7fa;
+            color: #333;
+            line-height: 1.6;
+            padding: 20px;
+        }
+        
+        /* Canvas container */
+        .canvas-container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background-color: white;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            padding: 20px;
+        }
+        
+        /* Header styles */
+        .header {
+            text-align: center;
+            margin-bottom: 20px;
+        }
+        
+        .header h1 {
+            font-size: 2.2em;
+            color: #2a6ec8;
+            margin-bottom: 5px;
+        }
+        
+        .header p {
+            color: #7a8599;
+            font-size: 0.9em;
+        }
+        
+        /* Title section */
+        .title-section {
+            display: flex;
+            margin-bottom: 30px;
+            gap: 20px;
+        }
+        
+        .title-section .label {
+            flex: 1;
+            font-size: 1.4em;
+            font-weight: bold;
+            display: flex;
+            align-items: center;
+        }
+        
+        .title-section .input {
+            flex: 3;
+        }
+        
+        .title-section input {
+            width: 100%;
+            padding: 15px;
+            font-size: 1.2em;
+            border: 1px solid #d1d9e6;
+            border-radius: 4px;
+        }
+        
+        /* Canvas grid */
+        .row {
+            display: flex;
+            margin-bottom: 20px;
+            gap: 20px;
+        }
+        
+        .cell {
+            flex: 1;
+            border: 1px solid #d1d9e6;
+            border-radius: 5px;
+            padding: 15px;
+            background-color: #ffffff;
+            position: relative;
+        }
+        
+        .cell-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 10px;
+            padding-bottom: 5px;
+            border-bottom: 1px solid #e9ecef;
+        }
+        
+        .cell-title {
+            font-size: 1.2em;
+            font-weight: bold;
+            color: #2a6ec8;
+            margin: 0;
+        }
+        
+        .icon {
+            width: 24px;
+            height: 24px;
+            font-size: 1.5em;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #7a8599;
+        }
+        
+        .prompt {
+            color: #7a8599;
+            font-style: italic;
+            margin-bottom: 10px;
+            font-size: 0.9em;
+        }
+        
+        textarea {
+            width: 100%;
+            min-height: 120px;
+            border: 1px solid #d1d9e6;
+            border-radius: 4px;
+            padding: 10px;
+            font-size: 0.9em;
+            resize: vertical;
+            margin-bottom: 10px;
+        }
+        
+        .example-section {
+            background-color: #f0f7ff;
+            border: 1px solid #d0e1f9;
+            border-radius: 4px;
+            padding: 10px;
+            margin-top: 5px;
+            font-size: 0.9em;
+        }
+        
+        .example-section h4 {
+            color: #2a6ec8;
+            margin-bottom: 5px;
+            display: flex;
+            align-items: center;
+            cursor: pointer;
+        }
+        
+        .example-content {
+            margin-top: 5px;
+            text-align: left;
+        }
+        
+        .use-example-btn {
+            background-color: #e9ecef;
+            color: #495057;
+            border: none;
+            padding: 4px 8px;
+            border-radius: 4px;
+            font-size: 0.8em;
+            cursor: pointer;
+            margin-left: auto;
+        }
+        
+        .use-example-btn:hover {
+            background-color: #dde2e6;
+        }
+        
+        .example-section h4:before {
+            content: '▶';
+            font-size: 0.7em;
+            margin-right: 5px;
+            transition: transform 0.2s;
+        }
+        
+        .example-section.expanded h4:before {
+            content: '▼';
+        }
+        
+        .example-section .example-content {
+            display: none;
+        }
+        
+        .example-section.expanded .example-content {
+            display: block;
+        }
+        
+        .row-2col .cell {
+            min-height: 150px;
+        }
+        
+        .row-2col-tall .cell {
+            min-height: 200px;
+        }
+        
+        /* Buttons */
+        .buttons {
+            display: flex;
+            justify-content: center;
+            gap: 10px;
+            margin-top: 30px;
+        }
+        
+        button {
+            padding: 10px 20px;
+            border: none;
+            border-radius: 4px;
+            font-size: 1em;
+            font-weight: 500;
+            cursor: pointer;
+            transition: background-color 0.2s;
+        }
+        
+        button.primary {
+            background-color: #2a6ec8;
+            color: white;
+        }
+        
+        button.primary:hover {
+            background-color: #215ca8;
+        }
+        
+        button.secondary {
+            background-color: #e9ecef;
+            color: #495057;
+        }
+        
+        button.secondary:hover {
+            background-color: #dde2e6;
+        }
+        
+        button.danger {
+            background-color: #dc3545;
+            color: white;
+        }
+        
+        button.danger:hover {
+            background-color: #bd2130;
+        }
+        
+        /* Notification */
+        .notification {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            padding: 15px 20px;
+            background-color: #28a745;
+            color: white;
+            border-radius: 4px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.2);
+            z-index: 1000;
+            opacity: 1;
+            transition: opacity 0.5s;
+        }
+        
+        /* Save status indicator */
+        .save-status {
+            position: fixed;
+            bottom: 10px;
+            left: 10px;
+            font-size: 0.8em;
+            color: #7a8599;
+        }
+        
+        /* Responsive adjustments */
+        @media (max-width: 768px) {
+            .title-section {
+                flex-direction: column;
+                gap: 10px;
+            }
+            
+            .row {
+                flex-direction: column;
+            }
+            
+            .cell {
+                margin-bottom: 15px;
+            }
+            
+            .buttons {
+                flex-direction: column;
+            }
+            
+            button {
+                width: 100%;
+            }
+        }
+        
+        /* Print styles */
+        @media print {
+            body {
+                background-color: white;
+                padding: 0;
+            }
+            
+            .canvas-container {
+                box-shadow: none;
+                padding: 0;
+            }
+            
+            .buttons, .example-section {
+                display: none;
+            }
+            
+            .save-status {
+                display: none;
+            }
+            
+            footer {
+                display: none;
+            }
+            
+            /* Ensure all content is included */
+            .cell {
+                break-inside: avoid;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="canvas-container">
+        <div class="header">
+            <h1>AI Project Canvas</h1>
+            <p>A structured approach to planning AI implementation projects</p>
+        </div>
+        
+        <div class="title-section">
+            <div class="label">Project Title:</div>
+            <div class="input">
+                <input type="text" id="project-title" placeholder="Enter a descriptive title for your AI project">
+            </div>
+        </div>
+        
+        <!-- Row 1: Data, Skills, Value, Integration, Customers -->
+        <div class="row">
+            <div class="cell">
+                <div class="cell-header">
+                    <h2 class="cell-title">Data</h2>
+                    <div class="icon">≡</div>
+                </div>
+                <p class="prompt">Which data do you need?</p>
+                <textarea id="data-content" placeholder="List the data sources and types your AI project requires"></textarea>
+                <div class="example-section">
+                    <h4><span class="use-example-btn">Use Example</span></h4>
+                    <div class="example-content">
+                        <p>• Primary Data Sources:<br>
+                        - Customer interaction records<br>
+                        - Order history and transaction data<br>
+                        - Product information (specifications, pricing)<br>
+                        - User feedback and survey responses<br><br>
+                        
+                        • Technical Requirements:<br>
+                        - Data format specifications<br>
+                        - Volume considerations (expected size)<br>
+                        - Update frequency requirements<br>
+                        - Integration points with existing systems</p>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="cell">
+                <div class="cell-header">
+                    <h2 class="cell-title">Skills</h2>
+                    <div class="icon">🔑</div>
+                </div>
+                <p class="prompt">Which skills do you need for development?</p>
+                <textarea id="skills-content" placeholder="Identify the technical, domain, and project skills needed"></textarea>
+                <div class="example-section">
+                    <h4><span class="use-example-btn">Use Example</span></h4>
+                    <div class="example-content">
+                        <p>• Technical Skills:<br>
+                        - Machine learning/AI expertise<br>
+                        - Data engineering and preprocessing<br>
+                        - Backend/frontend development<br>
+                        - DevOps and deployment<br><br>
+                        
+                        • Domain Skills:<br>
+                        - Industry-specific knowledge<br>
+                        - Business process understanding<br>
+                        - Regulatory compliance expertise<br><br>
+                        
+                        • Project Skills:<br>
+                        - AI project management<br>
+                        - Change management<br>
+                        - Stakeholder communication</p>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="cell">
+                <div class="cell-header">
+                    <h2 class="cell-title">Value Proposition</h2>
+                    <div class="icon">🏆</div>
+                </div>
+                <p class="prompt">What is the value added by your project?</p>
+                <textarea id="value-content" placeholder="Describe the primary benefits and improvements the AI project will deliver"></textarea>
+                <div class="example-section">
+                    <h4><span class="use-example-btn">Use Example</span></h4>
+                    <div class="example-content">
+                        <p>• Efficiency Improvements:<br>
+                        - Process automation (reduce manual work by X%)<br>
+                        - Time savings (reduce processing time by X)<br>
+                        - Error reduction (lower error rates by X%)<br><br>
+                        
+                        • Financial Benefits:<br>
+                        - Cost reduction (estimated $X savings)<br>
+                        - Revenue increase (potential $X growth)<br>
+                        - Resource optimization<br><br>
+                        
+                        • Strategic Advantages:<br>
+                        - Enhanced customer experience<br>
+                        - Competitive differentiation<br>
+                        - Scalability improvements</p>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="cell">
+                <div class="cell-header">
+                    <h2 class="cell-title">Integration</h2>
+                    <div class="icon">⊕</div>
+                </div>
+                <p class="prompt">How will the project be integrated?</p>
+                <textarea id="integration-content" placeholder="Define how the AI solution will integrate with existing systems and processes"></textarea>
+                <div class="example-section">
+                    <h4><span class="use-example-btn">Use Example</span></h4>
+                    <div class="example-content">
+                        <p>• Systems Integration:<br>
+                        - CRM/ERP connection points<br>
+                        - API requirements<br>
+                        - Database interactions<br>
+                        - Authentication systems<br><br>
+                        
+                        • Process Integration:<br>
+                        - Workflow adjustments<br>
+                        - Business process changes<br>
+                        - Decision points for AI vs. human<br><br>
+                        
+                        • Technical Requirements:<br>
+                        - Data exchange formats<br>
+                        - Real-time vs. batch processing<br>
+                        - Monitoring and logging</p>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="cell">
+                <div class="cell-header">
+                    <h2 class="cell-title">Customers</h2>
+                    <div class="icon">👤</div>
+                </div>
+                <p class="prompt">Who are the end customers?</p>
+                <textarea id="customers-content" placeholder="Identify who will use or benefit from the AI solution"></textarea>
+                <div class="example-section">
+                    <h4><span class="use-example-btn">Use Example</span></h4>
+                    <div class="example-content">
+                        <p>• Primary Users:<br>
+                        - Direct users of the AI system<br>
+                        - User demographics and characteristics<br>
+                        - Technical proficiency levels<br><br>
+                        
+                        • Secondary Users:<br>
+                        - Indirect users benefiting from output<br>
+                        - Management and oversight roles<br><br>
+                        
+                        • External Stakeholders:<br>
+                        - Customers/clients<br>
+                        - Partners and suppliers<br>
+                        - Regulatory bodies (if applicable)</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Row 2: Output, Stakeholders -->
+        <div class="row row-2col">
+            <div class="cell">
+                <div class="cell-header">
+                    <h2 class="cell-title">Output</h2>
+                    <div class="icon">🎯</div>
+                </div>
+                <p class="prompt">Which key metrics are you optimizing for?</p>
+                <textarea id="output-content" placeholder="Define the success metrics and targets for your AI project"></textarea>
+                <div class="example-section">
+                    <h4><span class="use-example-btn">Use Example</span></h4>
+                    <div class="example-content">
+                        <p>• Performance Metrics:<br>
+                        - Accuracy/precision (target: X%)<br>
+                        - Speed/response time (target: X seconds)<br>
+                        - Throughput capacity (X transactions/hour)<br><br>
+                        
+                        • Business Metrics:<br>
+                        - Productivity improvements (target: X%)<br>
+                        - Cost reduction (target: $X)<br>
+                        - Customer satisfaction (target: X point increase)<br><br>
+                        
+                        • Technical Metrics:<br>
+                        - System reliability/uptime (target: X%)<br>
+                        - Scalability measurements<br>
+                        - Quality assurance metrics</p>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="cell">
+                <div class="cell-header">
+                    <h2 class="cell-title">Stakeholders</h2>
+                    <div class="icon">👥</div>
+                </div>
+                <p class="prompt">Who are the key stakeholders?</p>
+                <textarea id="stakeholders-content" placeholder="List the key people and groups involved in or affected by the project"></textarea>
+                <div class="example-section">
+                    <h4><span class="use-example-btn">Use Example</span></h4>
+                    <div class="example-content">
+                        <p>• Project Leaders:<br>
+                        - Project sponsor/champion<br>
+                        - Project manager<br>
+                        - Technical lead<br><br>
+                        
+                        • Key Influencers:<br>
+                        - Department heads<br>
+                        - Subject matter experts<br>
+                        - IT and security teams<br><br>
+                        
+                        • Affected Groups:<br>
+                        - End users whose work will change<br>
+                        - Cross-functional team members<br>
+                        - External partners or customers</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Row 3: Cost, Revenue -->
+        <div class="row row-2col-tall">
+            <div class="cell">
+                <div class="cell-header">
+                    <h2 class="cell-title">Cost</h2>
+                    <div class="icon">💰</div>
+                </div>
+                <p class="prompt">What costs will the project incur?</p>
+                <textarea id="cost-content" placeholder="Outline development, implementation, and ongoing costs"></textarea>
+                <div class="example-section">
+                    <h4><span class="use-example-btn">Use Example</span></h4>
+                    <div class="example-content">
+                        <p>• Development Costs:<br>
+                        - AI/ML model development: $XXX,XXX<br>
+                        - Software engineering: $XXX,XXX<br>
+                        - Data acquisition/preparation: $XX,XXX<br>
+                        - Testing and validation: $XX,XXX<br><br>
+                        
+                        • Implementation Costs:<br>
+                        - Integration: $XX,XXX<br>
+                        - Training: $XX,XXX<br>
+                        - Change management: $XX,XXX<br><br>
+                        
+                        • Ongoing Costs:<br>
+                        - Maintenance and updates: $XX,XXX/year<br>
+                        - Infrastructure/hosting: $XX,XXX/year<br>
+                        - Support and operations: $XX,XXX/year<br><br>
+                        
+                        • Total Investment: $XXX,XXX over X months</p>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="cell">
+                <div class="cell-header">
+                    <h2 class="cell-title">Revenue/Savings</h2>
+                    <div class="icon">📈</div>
+                </div>
+                <p class="prompt">How will the project generate revenue or savings?</p>
+                <textarea id="revenue-content" placeholder="Quantify expected financial benefits and ROI"></textarea>
+                <div class="example-section">
+                    <h4><span class="use-example-btn">Use Example</span></h4>
+                    <div class="example-content">
+                        <p>• Direct Savings:<br>
+                        - Labor cost reduction: $XXX,XXX/year<br>
+                        - Error/waste reduction: $XX,XXX/year<br>
+                        - Process efficiency gains: $XXX,XXX/year<br><br>
+                        
+                        • Revenue Opportunities:<br>
+                        - New product/service capabilities: $XXX,XXX<br>
+                        - Improved customer retention: $XX,XXX<br>
+                        - Market expansion potential: $XXX,XXX<br><br>
+                        
+                        • ROI Analysis:<br>
+                        - Payback period: XX months<br>
+                        - 3-year ROI: XXX%<br>
+                        - Annual return rate: XX%</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="buttons">
+            <button id="saveBtn" class="primary">Save Draft</button>
+            <button id="loadBtn" class="secondary">Load Draft</button>
+            <button id="printBtn" class="secondary">Print/Save PDF</button>
+            <button id="resetBtn" class="danger">Reset Canvas</button>
+        </div>
+        
+        <div id="save-status" class="save-status"></div>
+    </div>
+    
+    <footer style="text-align: center; margin-top: 40px; padding: 20px; border-top: 1px solid #d1d9e6;">
+        <p style="color: #7a8599; font-size: 0.9em;">
+            © 2025 Himanshu Joshi | 
+            <a href="https://github.com/HimJoe" target="_blank" style="color: #2a6ec8; text-decoration: none; margin-left: 5px;">
+                GitHub Profile
+            </a>
+        </p>
+        <p style="color: #7a8599; font-size: 0.8em; margin-top: 5px;">
+            AI Project Canvas - A structured approach to planning AI projects
+        </p>
+    </footer>
+    
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // DOM elements
+            const projectTitle = document.getElementById('project-title');
+            const dataContent = document.getElementById('data-content');
+            const skillsContent = document.getElementById('skills-content');
+            const valueContent = document.getElementById('value-content');
+            const integrationContent = document.getElementById('integration-content');
+            const customersContent = document.getElementById('customers-content');
+            const outputContent = document.getElementById('output-content');
+            const stakeholdersContent = document.getElementById('stakeholders-content');
+            const costContent = document.getElementById('cost-content');
+            const revenueContent = document.getElementById('revenue-content');
+            
+            const saveBtn = document.getElementById('saveBtn');
+            const loadBtn = document.getElementById('loadBtn');
+            const printBtn = document.getElementById('printBtn');
+            const resetBtn = document.getElementById('resetBtn');
+            const saveStatus = document.getElementById('save-status');
+            
+            // Example sections
+            const exampleSections = document.querySelectorAll('.example-section');
+            
+            // Initialize examples as expandable
+            exampleSections.forEach(section => {
+                const header = section.querySelector('h4');
+                const useButton = header.querySelector('.use-example-btn');
+                const content = section.querySelector('.example-content');
+                
+                // Toggle example visibility
+                header.addEventListener('click', function(e) {
+                    if (e.target !== useButton) {
+                        section.classList.toggle('expanded');
+                    }
+                });
+                
+                // Use example button
+                if (useButton) {
+                    useButton.addEventListener('click', function(e) {
+                        e.stopPropagation();
+                        const textarea = section.previousElementSibling;
+                        if (textarea && content) {
+                            textarea.value = content.innerText;
+                            textarea.style.height = 'auto';
+                            textarea.style.height = (textarea.scrollHeight) + 'px';
+                            saveDraft();
+                        }
+                    });
+                }
+            });
+            
+            // Define storage key
+            const STORAGE_KEY = 'aiProjectCanvasData';
+            
+            // Autosave functionality
+            let autoSaveTimer;
+            const AUTO_SAVE_DELAY = 2000; // 2 seconds
+            
+            // Collection of all form fields
+            const formFields = [
+                { element: projectTitle, key: 'projectTitle' },
+                { element: dataContent, key: 'dataContent' },
+                { element: skillsContent, key: 'skillsContent' },
+                { element: valueContent, key: 'valueContent' },
+                { element: integrationContent, key: 'integrationContent' },
+                { element: customersContent, key: 'customersContent' },
+                { element: outputContent, key: 'outputContent' },
+                { element: stakeholdersContent, key: 'stakeholdersContent' },
+                { element: costContent, key: 'costContent' },
+                { element: revenueContent, key: 'revenueContent' }
+            ];
+            
+            // Add input listeners to all fields for autosave
+            formFields.forEach(field => {
+                if(field.element) {
+                    field.element.addEventListener('input', () => {
+                        updateSaveStatus('Saving...');
+                        clearTimeout(autoSaveTimer);
+                        autoSaveTimer = setTimeout(() => {
+                            saveDraft();
+                        }, AUTO_SAVE_DELAY);
+                    });
+                }
+            });
+            
+            // Test localStorage availability
+            function isLocalStorageAvailable() {
+                try {
+                    const testKey = 'test';
+                    localStorage.setItem(testKey, testKey);
+                    localStorage.removeItem(testKey);
+                    return true;
+                } catch (e) {
+                    return false;
+                }
+            }
+            
+            // Update save status
+            function updateSaveStatus(message) {
+                if(saveStatus) {
+                    saveStatus.textContent = message;
+                }
+            }
+            
+            // Function to save the canvas data
+            function saveDraft() {
+                if (!isLocalStorageAvailable()) {
+                    showNotification('Cannot save: Local storage is not available in your browser.', 'error');
+                    updateSaveStatus('Cannot save.');
+                    return;
+                }
+                
+                try {
+                    const canvasData = {};
+                    
+                    formFields.forEach(field => {
+                        if(field.element) {
+                            canvasData[field.key] = field.element.value;
+                        }
+                    });
+                    
+                    const dataString = JSON.stringify(canvasData);
+                    localStorage.setItem(STORAGE_KEY, dataString);
+                    
+                    updateSaveStatus('Last saved: ' + new Date().toLocaleTimeString());
+                    showNotification('Draft saved successfully!');
+                    console.log('Canvas data saved');
+                } catch (error) {
+                    console.error('Error saving draft:', error);
+                    updateSaveStatus('Save failed.');
+                    showNotification('Error saving draft. Please try again.', 'error');
+                }
+            }
+            
+            // Function to load canvas data
+            function loadDraft() {
+                if (!isLocalStorageAvailable()) {
+                    showNotification('Cannot load: Local storage is not available in your browser.', 'error');
+                    return;
+                }
+                
+                try {
+                    const savedData = localStorage.getItem(STORAGE_KEY);
+                    
+                    if (savedData) {
+                        const canvasData = JSON.parse(savedData);
+                        
+                        formFields.forEach(field => {
+                            if(field.element && canvasData[field.key] !== undefined) {
+                                field.element.value = canvasData[field.key];
+                                
+                                // Adjust height for textareas
+                                if (field.element.tagName.toLowerCase() === 'textarea') {
+                                    field.element.style.height = 'auto';
+                                    field.element.style.height = (field.element.scrollHeight) + 'px';
+                                }
+                            }
+                        });
+                        
+                        updateSaveStatus('Loaded from storage.');
+                        showNotification('Draft loaded successfully!');
+                    } else {
+                        showNotification('No saved draft found.', 'warning');
+                    }
+                } catch (error) {
+                    console.error('Error loading draft:', error);
+                    showNotification('Error loading draft. The saved data may be corrupted.', 'error');
+                }
+            }
+            
+            // Function to reset the canvas
+            function resetCanvas() {
+                if (confirm('Are you sure you want to reset the canvas? All your data will be cleared.')) {
+                    formFields.forEach(field => {
+                        if(field.element) {
+                            field.element.value = '';
+                            
+                            // Reset height for textareas
+                            if (field.element.tagName.toLowerCase() === 'textarea') {
+                                field.element.style.height = '';
+                            }
+                        }
+                    });
+                    
+                    if (isLocalStorageAvailable()) {
+                        localStorage.removeItem(STORAGE_KEY);
+                    }
+                    
+                    updateSaveStatus('Canvas reset.');
+                    showNotification('Canvas has been reset.');
+                }
+            }
+            
+            // Function to show notifications
+            function showNotification(message, type = 'success') {
+                // Remove any existing notification
+                const existingNotification = document.querySelector('.notification');
+                if (existingNotification) {
+                    document.body.removeChild(existingNotification);
+                }
+                
+                // Create notification element
+                const notification = document.createElement('div');
+                notification.className = 'notification';
+                notification.textContent = message;
+                
+                // Style based on type
+                if (type === 'error') {
+                    notification.style.backgroundColor = '#dc3545';
+                } else if (type === 'warning') {
+                    notification.style.backgroundColor = '#ffc107';
+                    notification.style.color = '#212529';
+                } else {
+                    notification.style.backgroundColor = '#28a745';
+                }
+                
+                // Add to document
+                document.body.appendChild(notification);
+                
+                // Remove after 3 seconds
+                setTimeout(() => {
+                    notification.style.opacity = '0';
+                    
+                    // Remove from DOM after fade out
+                    setTimeout(() => {
+                        if (document.body.contains(notification)) {
+                            document.body.removeChild(notification);
+                        }
+                    }, 500);
+                }, 3000);
+            }
+            
+            // Load saved data when page loads
+            window.addEventListener('load', () => {
+                // Initialize all example sections as collapsed
+                exampleSections.forEach(section => {
+                    section.classList.remove('expanded');
+                });
+                
+                // Check for localStorage availability
+                if (isLocalStorageAvailable()) {
+                    if (localStorage.getItem(STORAGE_KEY)) {
+                        // Automatic load of saved data
+                        loadDraft();
+                    } else {
+                        updateSaveStatus('No saved data.');
+                    }
+                } else {
+                    updateSaveStatus('Local storage not available.');
+                    showNotification('Warning: This browser doesn\'t support saving. Your data won\'t be saved.', 'warning');
+                }
+                
+                // Auto-resize textareas to fit content
+                document.querySelectorAll('textarea').forEach(textarea => {
+                    textarea.style.height = 'auto';
+                    textarea.style.height = (textarea.scrollHeight) + 'px';
+                });
+            });
+            
+            // Button event listeners
+            if(saveBtn) saveBtn.addEventListener('click', saveDraft);
+            if(loadBtn) loadBtn.addEventListener('click', loadDraft);
+            if(printBtn) printBtn.addEventListener('click', () => { window.print(); });
+            if(resetBtn) resetBtn.addEventListener('click', resetCanvas);
+            
+            // Auto-resize textareas as content grows
+            document.querySelectorAll('textarea').forEach(textarea => {
+                textarea.addEventListener('input', function() {
+                    this.style.height = 'auto';
+                    this.style.height = (this.scrollHeight) + 'px';
+                });
+            });
+        });
+    </script>
+</body>
+</html>
